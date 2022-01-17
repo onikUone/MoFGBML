@@ -1,6 +1,4 @@
-package cilabo.fuzzy.rule.consequent;
-
-import cilabo.data.ClassLabel;
+package cilabo.data;
 
 public class RejectedClassLabel extends ClassLabel {
 	private static RejectedClassLabel instance;

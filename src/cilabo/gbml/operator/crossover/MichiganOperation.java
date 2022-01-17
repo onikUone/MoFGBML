@@ -39,6 +39,7 @@ import cilabo.utility.Random;
 
 public class MichiganOperation implements CrossoverOperator<IntegerSolution> {
 	private double crossoverProbability;
+	@SuppressWarnings("unused")
 	private RandomGenerator<Double> crossoverRandomGenerator;
 	BoundedRandomGenerator<Integer> selectRandomGenerator;
 

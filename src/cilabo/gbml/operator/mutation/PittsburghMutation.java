@@ -17,7 +17,9 @@ import cilabo.utility.Random;
 
 public class PittsburghMutation implements MutationOperator<IntegerSolution> {
 	private double mutationProbability;
+	@SuppressWarnings("unused")
 	private RandomGenerator<Double> randomGenerator;
+	@SuppressWarnings("unused")
 	private BoundedRandomGenerator<Integer> intRandomGenerator;
 	private Knowledge knowledge;
 	private DataSet train;

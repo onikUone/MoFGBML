@@ -1,4 +1,4 @@
-package cilabo.gbml.problem.impl.pittsburgh;
+package cilabo.gbml.problem.impl.multilabel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,9 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.solution.integersolution.IntegerSolution;
 
+import cilabo.data.ClassLabel;
 import cilabo.data.DataSet;
 import cilabo.fuzzy.knowledge.factory.HomoTriangleKnowledgeFactory;
 import cilabo.fuzzy.knowledge.membershipParams.HomoTriangle_2_3_4_5;
@@ -18,50 +18,46 @@ import cilabo.fuzzy.rule.antecedent.AntecedentFactory;
 import cilabo.fuzzy.rule.antecedent.factory.HeuristicRuleGenerationMethod;
 import cilabo.fuzzy.rule.consequent.Consequent;
 import cilabo.fuzzy.rule.consequent.ConsequentFactory;
-import cilabo.fuzzy.rule.consequent.factory.MoFGBML_Learning;
+import cilabo.fuzzy.rule.consequent.factory.MultiLabel_MoFGBML_Learning;
 import cilabo.gbml.objectivefunction.ObjectiveFunction;
-import cilabo.gbml.objectivefunction.impl.ErrorRateForPittsburgh;
+import cilabo.gbml.objectivefunction.impl.MultiLabelOutputOfPittsburgh;
 import cilabo.gbml.objectivefunction.impl.NumberOfRules;
 import cilabo.gbml.problem.AbstractPitssburghGBML_Problem;
 import cilabo.gbml.solution.MichiganSolution;
 import cilabo.gbml.solution.PittsburghSolution;
 import cilabo.main.Consts;
+import cilabo.metric.Metric;
+import cilabo.metric.multilabel.SubsetAccuracy;
 import cilabo.utility.GeneralFunctions;
 import cilabo.utility.Random;
 
-/**
- * The first multi-objective optimization problem definition on MoFGBML.
- * The first objective is minimizing classification error for the training dataset.
- * The second objective is minimizing number of rules.
- *
- */
-public class MOP1<S extends Solution<?>> extends AbstractPitssburghGBML_Problem<S> {
+public class MOP1_SubsetAccuracyAndRuleNum extends AbstractPitssburghGBML_Problem<IntegerSolution> {
 	// ************************************
 	private DataSet evaluationDataset;
 	private float[][] params = HomoTriangle_2_3_4_5.getParams();
 
 	// ************************************
-	public MOP1(DataSet train) {
+	public MOP1_SubsetAccuracyAndRuleNum(DataSet train) {
 		this.evaluationDataset = train;
-		setNumberOfVariables(train.getNdim()*Consts.MAX_RULE_NUM);	// 可変だが、最大値で設定
+		setNumberOfVariables(train.getNdim()*Consts.MAX_RULE_NUM);
 		setNumberOfObjectives(2);
 		setNumberOfConstraints(0);
-		setName("MOP1_minError_and_minNrule");
+		setName("MOP1_maxSubAcc_and_minNrule");
 
 		// Initialization
 		this.knowledge = HomoTriangleKnowledgeFactory.builder()
-				.dimension(train.getNdim())
-				.params(params)
-				.build()
-				.create();
+							.dimension(train.getNdim())
+							.params(params)
+							.build()
+							.create();
 		AntecedentFactory antecedentFactory = HeuristicRuleGenerationMethod.builder()
-										.knowledge(knowledge)
-										.train(train)
-										.samplingIndex(new Integer[] {})
-										.build();
-		ConsequentFactory consequentFactory = MoFGBML_Learning.builder()
-				.train(train)
-				.build();
+											.knowledge(knowledge)
+											.train(train)
+											.samplingIndex(new Integer[] {})
+											.build();
+		ConsequentFactory consequentFactory = MultiLabel_MoFGBML_Learning.builder()
+												.train(train)
+												.build();
 		setAntecedentFactory(antecedentFactory);
 		setConsequentFactory(consequentFactory);
 
@@ -76,9 +72,7 @@ public class MOP1<S extends Solution<?>> extends AbstractPitssburghGBML_Problem<
 	}
 
 	// ************************************
-
 	/* Getter */
-
 	public DataSet getEvaluationDataset() {
 		return this.evaluationDataset;
 	}
@@ -88,6 +82,7 @@ public class MOP1<S extends Solution<?>> extends AbstractPitssburghGBML_Problem<
 		this.evaluationDataset = evaluationDataset;
 	}
 
+	/* Method */
 	@Override
 	public PittsburghSolution createSolution() {
 		// Boundary
@@ -113,33 +108,37 @@ public class MOP1<S extends Solution<?>> extends AbstractPitssburghGBML_Problem<
 			Antecedent antecedent = antecedentFactory.create();
 			Consequent consequent = consequentFactory.learning(antecedent);
 
-			MichiganSolution solution = new MichiganSolution(michiganBounds,
-															 1,	// Number of objectives for Michigan solution
-															 0,	// Number of constraints for Michigan solution
-															 antecedent, consequent);
+			MichiganSolution solution
+				= new MichiganSolution(michiganBounds,
+										1,	// Number of objectives for Michigan solution
+					 					0,	// Number of constraints for Michigan solution
+					 					antecedent, consequent);
 			michiganPopulation.add(solution);
 		}
 
-		PittsburghSolution solution = new PittsburghSolution(this.getBounds(),
-								 							this.getNumberOfObjectives(),
-								 							michiganPopulation,
-								 							classification);
+		PittsburghSolution solution
+			= new PittsburghSolution(this.getBounds(),
+									 this.getNumberOfObjectives(),
+									 michiganPopulation,
+									 classification);
 		return solution;
 	}
 
 	@Override
 	public void evaluate(IntegerSolution solution) {
+		MultiLabelOutputOfPittsburgh function = new MultiLabelOutputOfPittsburgh(evaluationDataset);
+		ArrayList<ClassLabel> classifiedClassLabels = function.function((PittsburghSolution)solution);
+
 		/* The first objective */
-		ObjectiveFunction<PittsburghSolution, Double> function1 = new ErrorRateForPittsburgh(evaluationDataset);
-		double f1 = function1.function((PittsburghSolution)solution);
+		Metric function1 = new SubsetAccuracy();
+		double f1 = (double)function1.metric(classifiedClassLabels, evaluationDataset);
+
 		/* The second objective */
 		ObjectiveFunction<PittsburghSolution, Double> function2 = new NumberOfRules();
 		double f2 = function2.function((PittsburghSolution)solution);
 
-		solution.setObjective(0, f1);
+		solution.setObjective(0, -1.0*f1);
 		solution.setObjective(1, f2);
 	}
 
-
 }
-

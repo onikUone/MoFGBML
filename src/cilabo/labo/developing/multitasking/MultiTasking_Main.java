@@ -3,13 +3,23 @@ package cilabo.labo.developing.multitasking;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Date;
+import java.util.List;
 
+import org.uma.jmetal.algorithm.impl.AbstractEvolutionaryAlgorithm;
+import org.uma.jmetal.component.termination.Termination;
+import org.uma.jmetal.component.termination.impl.TerminationByEvaluations;
+import org.uma.jmetal.solution.integersolution.IntegerSolution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 import cilabo.data.DataSet;
 import cilabo.data.impl.TrainTestDatasetManager;
+import cilabo.fuzzy.classifier.operator.classification.Classification;
+import cilabo.fuzzy.classifier.operator.classification.factory.CFmeanClassification;
 import cilabo.main.Consts;
+import cilabo.util.ConstantPeriodOutput;
+import cilabo.util.OutputFrequency;
+import cilabo.utility.Input;
 import cilabo.utility.Output;
 import cilabo.utility.Parallel;
 import cilabo.utility.Random;
@@ -65,12 +75,15 @@ public class MultiTasking_Main {
 		JMetalRandom.getInstance().setSeed(Consts.RAND_SEED);
 
 		/* Load Dataset ======================== */
+		DataSet train = new DataSet();
+		DataSet test = new DataSet();
+		Input.inputMultiLabelDataSet(train, CommandLineArgs.trainFile);
+		Input.inputMultiLabelDataSet(test, CommandLineArgs.testFile);
 		TrainTestDatasetManager datasetManager = new TrainTestDatasetManager();
-		datasetManager.loadTrainTestFiles(CommandLineArgs.trainFile, CommandLineArgs.testFile);
+		datasetManager.addTrains(train);
+		datasetManager.addTests(test);
 
 		/* Run MoFGBML algorithm =============== */
-		DataSet train = datasetManager.getTrains().get(0);
-		DataSet test = datasetManager.getTests().get(0);
 		MultiTaskingMoFGBML(train, test);
 		/* ===================================== */
 
@@ -88,6 +101,60 @@ public class MultiTasking_Main {
 	 * @param test
 	 */
 	public static void MultiTaskingMoFGBML(DataSet train, DataSet test) {
+//		String sep = File.separator;
+
+		/* Output frequency: Constant period of evaluations */
+		OutputFrequency outputFrequency = new ConstantPeriodOutput(Consts.outputFrequency);
+
+		/* Termination: Number of total evaluations */
+		Termination termination = new TerminationByEvaluations(Consts.terminateEvaluation);
+
+		/* Classification: CF-mean Method */
+		Classification classification = new CFmeanClassification();
+
+		AbstractEvolutionaryAlgorithm<IntegerSolution, List<IntegerSolution>> algorithm
+		= new EveryGenerationSharingTaskManager<>(train,
+												  CommandLineArgs.sharingAmount,
+												  Consts.populationSize,
+												  Consts.offspringPopulationSize,
+												  outputFrequency,
+												  Consts.EXPERIMENT_ID_DIR,
+												  termination,
+												  classification);
+
+		/* === ALGORITHM RUN === */
+		algorithm.run();
+		/* ============== */
+
+//		List<Task<? extends Solution<?>>> taskList = ((TaskManager)algorithm).getTaskList();
+
 
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

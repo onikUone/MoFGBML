@@ -1,8 +1,8 @@
 package cilabo.fuzzy.rule;
 
+import cilabo.data.RejectedClassLabel;
 import cilabo.fuzzy.rule.antecedent.Antecedent;
 import cilabo.fuzzy.rule.consequent.Consequent;
-import cilabo.fuzzy.rule.consequent.RejectedClassLabel;
 import cilabo.fuzzy.rule.consequent.RuleWeight;
 
 public class RejectedRule extends Rule {
