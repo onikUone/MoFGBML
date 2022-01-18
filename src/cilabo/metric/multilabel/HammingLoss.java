@@ -62,20 +62,26 @@ public class HammingLoss implements Metric {
 		double size = dataset.getDataSize();	// Number of instances;
 		double noClass = dataset.getCnum();		// Number of classes;
 
-		double HammingLoss = 0;
+		double hammingLoss = 0;
 		for(int p = 0; p < size; p++) {
 			InputVector vector = dataset.getPattern(p).getInputVector();
 			Integer[] trueClass = dataset.getPattern(p).getTrueClass().getClassVector();
 
-			Integer[] classifiedClass = classifier.classify(vector)
-													.getConsequent().getClassLabel()
-													.getClassVector();
+			ClassLabel classifiedLabel = classifier.classify(vector)
+											.getConsequent().getClassLabel();
+			if(classifiedLabel.getClass() == RejectedClassLabel.class) {
+				double distance = trueClass.length;
+				hammingLoss += distance / noClass;
+			}
+			else {
+				Integer[] classifiedClass = classifiedLabel.getClassVector();
 
-			double distance = GeneralFunctions.HammingDistance(trueClass, classifiedClass);
-			HammingLoss += distance / noClass;
+				double distance = GeneralFunctions.HammingDistance(trueClass, classifiedClass);
+				hammingLoss += distance / noClass;
+			}
 		}
 
-		return 100.0 * HammingLoss/size;
+		return 100.0 * hammingLoss/size;
 	}
 
 	public Double metric(ArrayList<ClassLabel> classifiedLabels, DataSet dataset) {
@@ -90,12 +96,15 @@ public class HammingLoss implements Metric {
 		for(int p = 0; p < size; p++) {
 			Integer[] trueClass = dataset.getPattern(p).getTrueClass().getClassVector();
 			if(classifiedLabels.get(p).getClass() == RejectedClassLabel.class) {
-				continue;
+				double distance = trueClass.length;
+				hammingLoss += distance / noClass;
 			}
-			Integer[] classifiedClass = classifiedLabels.get(p).getClassVector();
+			else {
+				Integer[] classifiedClass = classifiedLabels.get(p).getClassVector();
 
-			double distance = GeneralFunctions.HammingDistance(trueClass, classifiedClass);
-			hammingLoss += distance / noClass;
+				double distance = GeneralFunctions.HammingDistance(trueClass, classifiedClass);
+				hammingLoss += distance / noClass;
+			}
 		}
 
 		return 100.0 * hammingLoss/size;

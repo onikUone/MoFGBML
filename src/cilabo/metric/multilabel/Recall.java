@@ -1,7 +1,9 @@
 package cilabo.metric.multilabel;
 
+import cilabo.data.ClassLabel;
 import cilabo.data.DataSet;
 import cilabo.data.InputVector;
+import cilabo.data.RejectedClassLabel;
 import cilabo.fuzzy.classifier.RuleBasedClassifier;
 import cilabo.metric.Metric;
 
@@ -53,9 +55,12 @@ public class Recall implements Metric {
 			InputVector vector = dataset.getPattern(p).getInputVector();
 			Integer[] trueClass = dataset.getPattern(p).getTrueClass().getClassVector();
 
-			Integer[] classifiedClass = classifier.classify(vector)
-					.getConsequent().getClassLabel()
-					.getClassVector();
+			ClassLabel classifiedLabel = classifier.classify(vector)
+											.getConsequent().getClassLabel();
+			if(classifiedLabel.getClass() == RejectedClassLabel.class) {
+				continue;
+			}
+			Integer[] classifiedClass = classifiedLabel.getClassVector();
 
 			recall += RecallMetric(classifiedClass, trueClass);
 		}

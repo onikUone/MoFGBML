@@ -66,9 +66,12 @@ public class Fmeasure implements Metric {
 			InputVector vector = dataset.getPattern(p).getInputVector();
 			Integer[] trueClass = dataset.getPattern(p).getTrueClass().getClassVector();
 
-			Integer[] classifiedClass = classifier.classify(vector)
-					.getConsequent().getClassLabel()
-					.getClassVector();
+			ClassLabel classifiedLabel = classifier.classify(vector)
+					.getConsequent().getClassLabel();
+			if(classifiedLabel.getClass() == RejectedClassLabel.class) {
+				continue;
+			}
+			Integer[] classifiedClass = classifiedLabel.getClassVector();
 
 			precision += Precision.PrecisionMetric(classifiedClass, trueClass);
 			recall += Recall.RecallMetric(classifiedClass, trueClass);

@@ -106,7 +106,7 @@ public class Task<S extends Solution<?>> extends AbstractEvolutionaryAlgorithm<S
 	    /* Output initial population */
 	    Integer evaluations = (Integer)algorithmStatusData.get("EVALUATIONS");
 	    String sep = File.separator;
-	    String path = outputRootDir+sep+ "solutions-"+evaluations+".txt";
+	    String path = outputRootDir+sep+ "solutions-"+evaluations+".csv";
 	    this.solutionListOutput.print(path, getPopulation());
 	}
 
@@ -125,7 +125,7 @@ public class Task<S extends Solution<?>> extends AbstractEvolutionaryAlgorithm<S
 	    if(evaluations != null) {
 	    	if(this.outputFrequency.isTimeToOutput(algorithmStatusData)) {
 	    		String sep = File.separator;
-	    		String path = outputRootDir+sep+ "solutions-"+evaluations+".txt";
+	    		String path = outputRootDir+sep+ "solutions-"+evaluations+".csv";
 	    		this.solutionListOutput.print(path, getPopulation());
 	    	}
 	    }
@@ -185,17 +185,16 @@ public class Task<S extends Solution<?>> extends AbstractEvolutionaryAlgorithm<S
 		List<S> matingPopulation = (List<S>)algorithmStatusData.get("MATING_POPULATION");
 		List<S> offspringPopulation;
 		/* ============================================================ */
+		/* 現世代個体群 Attribute更新 */
+		population.stream().forEach(solution -> {
+			solution.setAttribute((new ParentOrChild<>()).getAttributeId(), "current");
+		});
 		/* 子個体群生成 - Offspring Generation */
 		offspringPopulation = reproduction(matingPopulation);
 		/* 子個体群評価 - Offsprign Evaluation */
 		offspringPopulation = evaluatePopulation(offspringPopulation);
 		/* 個体群更新・環境選択 - Environmental Selection */
 		population = replacement(population, offspringPopulation);
-		/* 次世代個体群 Attribute更新 */
-		population.stream().forEach(solution -> {
-			solution.setAttribute((new ParentOrChild<>()).getAttributeId(), "current");
-		});
-
 		/* JMetal progress update */
 		updateProgress();
 		/* ============================================================ */

@@ -65,6 +65,9 @@ public class SubsetAccuracy implements Metric {
 			ClassLabel trueClass = dataset.getPattern(p).getTrueClass();
 
 			ClassLabel classifiedClass = classifier.classify(vector).getConsequent().getClassLabel();
+			if(classifiedClass.getClass() == RejectedClassLabel.class) {
+				continue;
+			}
 
 			if( trueClass.toString().equals( classifiedClass.toString() )) {
 				correct += 1;

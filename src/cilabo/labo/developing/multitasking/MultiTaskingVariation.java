@@ -1,7 +1,10 @@
 package cilabo.labo.developing.multitasking;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.uma.jmetal.component.variation.Variation;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
@@ -15,6 +18,7 @@ import cilabo.fuzzy.rule.consequent.Consequent;
 import cilabo.fuzzy.rule.consequent.ConsequentFactory;
 import cilabo.gbml.solution.MichiganSolution;
 import cilabo.gbml.solution.PittsburghSolution;
+import cilabo.gbml.solution.util.attribute.multitasking.FamilyLine;
 import cilabo.gbml.solution.util.attribute.multitasking.ParentOrChild;
 
 /**
@@ -57,6 +61,7 @@ public class MultiTaskingVariation<S extends Solution<?>>
 
 	// ************************************************************
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<S> variate(List<S> population, List<S> matingPopulation) {
 		int numberOfParents = crossover.getNumberOfRequiredParents();
@@ -96,7 +101,20 @@ public class MultiTaskingVariation<S extends Solution<?>>
 				}
 			}
 
-			//TODO FamilyLine値計算，付与
+			// FamilyLine値計算，付与
+			Map<String, Double> newFamilyLine = new HashMap<>();
+			Set<String> keys = ((Map<String, Double>)parents.get(0).getAttribute((new FamilyLine<>()).getAttributeId())).keySet();
+			for(String key : keys) {
+				double sum = 0;
+				for(int j = 0; j < numberOfParents; j++) {
+					double value = ((Map<String, Double>)parents.get(j).getAttribute((new FamilyLine<>()).getAttributeId())).get(key);
+					sum += value;
+				}
+				newFamilyLine.put(key, sum/(double)numberOfParents);
+			}
+			for(S solution : offspring) {
+				solution.setAttribute((new FamilyLine<>()).getAttributeId(), newFamilyLine);
+			}
 
 			//タスク間交叉子個体 or タスク内交叉子個体 Attribute 付与
 			if(offspringPopulation.size() <= CommandLineArgs.sharingAmount) {
@@ -109,7 +127,6 @@ public class MultiTaskingVariation<S extends Solution<?>>
 					solution.setAttribute((new ParentOrChild<>()).getAttributeId(), "Domestic");
 				}
 			}
-
 
 		}
 		return offspringPopulation;

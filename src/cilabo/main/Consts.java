@@ -62,7 +62,7 @@ public class Consts {
 
 	//Experiment ************************************
 	/** ドット表示する世代間隔 */
-	public static int PER_SHOW_DOT = 100;	//元PER_SHOW_GENERATION_NUM
+	public static int PER_SHOW_DOT = 10;	//元PER_SHOW_GENERATION_NUM
 	/** 現世代数表示する世代間隔 */
 	public static int PER_SHOW_GENERATION_DETAIL = 10;
 

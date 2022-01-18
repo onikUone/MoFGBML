@@ -115,6 +115,12 @@ public class EveryGenerationSharingTaskManager<S extends Solution<?>>
 
 	    observable.setChanged();
 	    observable.notifyObservers(algorithmStatusData);
+
+	    Integer evaluations = (Integer)algorithmStatusData.get("EVALUATIONS");
+	    if(evaluations % (Consts.PER_SHOW_DOT * Consts.populationSize) == 0) {
+	    	System.out.println("Evaluation: " + evaluations);
+	    }
+
 	}
 
 	@Override
@@ -232,7 +238,7 @@ public class EveryGenerationSharingTaskManager<S extends Solution<?>>
 		task.setSelection(selection);
 
 		/* SolutionListOutput */
-		SolutionListOutputFormat solutionListOutput = new MultiTaskingSolutionListOutput();
+		SolutionListOutputFormat solutionListOutput = new MultiTaskingSolutionListOutput(this);
 		task.setSolutionListOutput(solutionListOutput);
 		return task;
 	}
