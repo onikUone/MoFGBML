@@ -11,6 +11,7 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.fileoutput.FileOutputContext;
 
+import cilabo.gbml.solution.util.attribute.multitasking.BirthPlace;
 import cilabo.gbml.solution.util.attribute.multitasking.FamilyLine;
 import cilabo.gbml.solution.util.attribute.multitasking.ParentOrChild;
 import cilabo.util.fileoutput.SolutionListOutputFormat;
@@ -54,6 +55,7 @@ public class MultiTaskingSolutionListOutput extends SolutionListOutputFormat {
 				for(int i = 0; i < numberOfTasks; i++) {
 					str += "," + "blood_task"+String.valueOf(i+1);
 				}
+				str += "," + "birthPlace";
 				str += ln;
 				bufferedWriter.write(str);
 
@@ -83,6 +85,8 @@ public class MultiTaskingSolutionListOutput extends SolutionListOutputFormat {
 						double value = familyLine.get("task"+(t+1));
 						str += "," + value;
 					}
+					// birth place
+					str += "," + solution.getAttribute((new BirthPlace<>()).getAttributeId());
 					str += ln;
 					bufferedWriter.write(str);
 				}

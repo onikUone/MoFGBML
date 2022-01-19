@@ -24,6 +24,7 @@ import cilabo.fuzzy.classifier.RuleBasedClassifier;
 import cilabo.fuzzy.classifier.operator.classification.Classification;
 import cilabo.fuzzy.classifier.operator.classification.factory.CFmeanClassification;
 import cilabo.gbml.solution.PittsburghSolution;
+import cilabo.gbml.solution.util.attribute.multitasking.BirthPlace;
 import cilabo.gbml.solution.util.attribute.multitasking.FamilyLine;
 import cilabo.gbml.solution.util.attribute.multitasking.ParentOrChild;
 import cilabo.main.Consts;
@@ -185,6 +186,8 @@ public class MultiTasking_Main {
 			for(int i = 0; i < numberOfTasks; i++) {
 				str += "," + "blood_task"+String.valueOf(i+1);
 			}
+			//BirthPlace
+			str += "," + "birthPlace";
 			/* Performance metrics */
 			str += "," + "ruleNum";
 			str += "," + "ruleLength";
@@ -239,6 +242,8 @@ public class MultiTasking_Main {
 					double value = familyLine.get("task"+(i+1));
 					str += "," + value;
 				}
+				// birth place
+				str += "," + solution.getAttribute((new BirthPlace<>()).getAttributeId());
 
 				/* Performance metrics */
 				str += "," + ruleNum.metric(classifier);

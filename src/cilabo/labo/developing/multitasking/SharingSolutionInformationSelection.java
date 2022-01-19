@@ -39,7 +39,7 @@ public class SharingSolutionInformationSelection<S extends Solution<?>>
 		List<S> matingPool = new ArrayList<>(matingPoolSize);
 
 		int numberOfTask = taskManager.getTaskList().size();
-		int offspringPopulatinSizePerTask = CommandLineArgs.sharingAmount / (numberOfTask - 1);
+		int offspringPopulationSizePerTask = CommandLineArgs.sharingAmount / (numberOfTask - 1);
 
 		Task<? extends Solution<?>> ownTask = null;
 		for(int i = 0; i < numberOfTask; i++) {
@@ -52,7 +52,7 @@ public class SharingSolutionInformationSelection<S extends Solution<?>>
 
 		/* タスク間交叉親個体選択 */
 		FirstObjectiveOrientedSelection<S> selectionOutTask
-			= new FirstObjectiveOrientedSelection<>(offspringPopulatinSizePerTask);
+			= new FirstObjectiveOrientedSelection<>(offspringPopulationSizePerTask);
 		for(int i = 0; i < numberOfTask; i++) {
 			Task<? extends Solution<?>> task = taskManager.getTaskList().get(i);
 			if(task.getTaskLabel().equals(this.ownTaskLabel)) {

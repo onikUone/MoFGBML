@@ -18,6 +18,7 @@ import cilabo.fuzzy.rule.consequent.Consequent;
 import cilabo.fuzzy.rule.consequent.ConsequentFactory;
 import cilabo.gbml.solution.MichiganSolution;
 import cilabo.gbml.solution.PittsburghSolution;
+import cilabo.gbml.solution.util.attribute.multitasking.BirthPlace;
 import cilabo.gbml.solution.util.attribute.multitasking.FamilyLine;
 import cilabo.gbml.solution.util.attribute.multitasking.ParentOrChild;
 
@@ -29,22 +30,26 @@ public class MultiTaskingVariation<S extends Solution<?>>
 			implements Variation<S>
 {
 	// ************************************************************
+	private String taskLabel;
+	private int offspringPopulationSize;
 	private CrossoverOperator<S> crossover;
 	private MutationOperator<S> mutation;
-	private int matingPoolSize;
-	private int offspringPopulationSize;
 	private ConsequentFactory consequentFactory;
+
+	private int matingPoolSize;
 
 	// ************************************************************
 	/* Constructor */
 	public MultiTaskingVariation(
 			/* Arguments */
+			String taskLabel,
 			int offspringPopulationSize,
 			CrossoverOperator<S> crossover,
 			MutationOperator<S> mutation,
 			ConsequentFactory consequentFactory)
 	{
 		/* Body */
+		this.taskLabel = taskLabel;
 		this.offspringPopulationSize = offspringPopulationSize;
 		this.crossover = crossover;
 		this.mutation = mutation;
@@ -101,6 +106,11 @@ public class MultiTaskingVariation<S extends Solution<?>>
 				}
 			}
 
+			// BirthPlace 付与
+			for(S solution : offspring) {
+				solution.setAttribute((new BirthPlace<>()).getAttributeId(), this.taskLabel);
+			}
+
 			// FamilyLine値計算，付与
 			Map<String, Double> newFamilyLine = new HashMap<>();
 			Set<String> keys = ((Map<String, Double>)parents.get(0).getAttribute((new FamilyLine<>()).getAttributeId())).keySet();
@@ -118,8 +128,9 @@ public class MultiTaskingVariation<S extends Solution<?>>
 
 			//タスク間交叉子個体 or タスク内交叉子個体 Attribute 付与
 			if(offspringPopulation.size() <= CommandLineArgs.sharingAmount) {
+				String from = (String)parents.get(0).getAttribute((new BirthPlace<>()).getAttributeId());
 				for(S solution : offspring) {
-					solution.setAttribute((new ParentOrChild<>()).getAttributeId(), "Sharing");
+					solution.setAttribute((new ParentOrChild<>()).getAttributeId(), "Sharing_"+from);
 				}
 			}
 			else {

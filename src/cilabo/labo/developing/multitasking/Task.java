@@ -25,6 +25,7 @@ import org.uma.jmetal.util.observable.Observable;
 import org.uma.jmetal.util.observable.ObservableEntity;
 import org.uma.jmetal.util.observable.impl.DefaultObservable;
 
+import cilabo.gbml.solution.util.attribute.multitasking.BirthPlace;
 import cilabo.gbml.solution.util.attribute.multitasking.FamilyLine;
 import cilabo.gbml.solution.util.attribute.multitasking.ParentOrChild;
 import cilabo.util.OutputFrequency;
@@ -146,9 +147,11 @@ public class Task<S extends Solution<?>> extends AbstractEvolutionaryAlgorithm<S
 		population = createInitialPopulation();
 		/* Step 2. 出身タスクAttribute付与 */
 		population.stream().forEach(solution -> {
+			/* BirthPlace */
+			solution.setAttribute((new BirthPlace<>()).getAttributeId(), this.taskLabel);
+			/* Family Line */
 			Map<String, Double> attribute = new HashMap<>(familyLine);	// Deep Copy
 			attribute.put(this.taskLabel, 1.0);
-			/* Family Line */
 			solution.setAttribute((new FamilyLine<>()).getAttributeId(), attribute);
 			/* How to be generated */
 			solution.setAttribute((new ParentOrChild<>()).getAttributeId(), "current");

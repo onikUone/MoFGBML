@@ -207,7 +207,11 @@ public class EveryGenerationSharingTaskManager<S extends Solution<?>>
 		/* Variation: */
 		Variation<IntegerSolution> variation =
 				new MultiTaskingVariation<>(
-						offspringPopulationSize, crossover, mutation, problem.getConsequentFactory());
+						label,
+						offspringPopulationSize,
+						crossover,
+						mutation,
+						problem.getConsequentFactory());
 		task.setVariation(variation);
 
 		/* Replacement: NSGA-II */
