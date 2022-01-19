@@ -26,6 +26,8 @@ public class CommandLineArgs extends AbstractArgs {
 	// ************************************************************
 	@Override
 	protected void load(String[] args) {
+		String sep = File.separator;
+
 		int n = 7;
 		if(args.length < n) {
 			System.out.println("Need n=" + String.valueOf(n) + " arguments.");
@@ -42,7 +44,7 @@ public class CommandLineArgs extends AbstractArgs {
 		Output.mkdirs(Consts.ALGORITHM_ID_DIR);
 
 		experimentID = args[2];
-		Consts.EXPERIMENT_ID_DIR = Consts.ALGORITHM_ID_DIR + File.separator + dataName+"_"+experimentID;
+		Consts.EXPERIMENT_ID_DIR = Consts.ALGORITHM_ID_DIR + File.separator + dataName+sep+experimentID;
 		Output.mkdirs(Consts.EXPERIMENT_ID_DIR);
 
 		parallelCores = Integer.parseInt(args[3]);
